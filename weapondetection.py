@@ -6,7 +6,7 @@ from ultralytics import YOLO
 import os
 
 # Load the YOLOv8 model (Adjust path to your model)
-model = YOLO("weights\best.pt")
+model = YOLO("weights/best.pt")
 
 # Streamlit app
 st.title("YOLOv8 Objects Detection App")
