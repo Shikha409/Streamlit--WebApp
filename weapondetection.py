@@ -183,7 +183,7 @@ MAX_BOXES_TO_DRAW = 10  # Maximum number of boxes to draw
 result_video_path = "processed_video.mp4"  # Path where the result video will be saved
 
 # Video upload processing
-option = st.sidebar.selectbox("Choose an option", ["Upload Video"])  # Adjust options as needed
+option = st.sidebar.selectbox("Choose an option", ["Upload Video"])
 
 if option == "Upload Video":
     uploaded_video = st.sidebar.file_uploader("7. Upload a video...", type=["mp4", "avi", "mov"])
@@ -204,7 +204,7 @@ if option == "Upload Video":
         video_placeholder = st.empty()
 
         st.subheader("Result Will Be Saved Here After Detection")
-        
+
         # Process video frames
         while cap.isOpened():
             ret, frame = cap.read()
@@ -215,7 +215,7 @@ if option == "Upload Video":
             results = load_yolor_and_process_each_frame(frame, MIN_SCORE_THRES, enable_cpu)
 
             # Draw bounding boxes on the frame
-            processed_frame = results[0].plot()  # Assuming you want to use YOLO's plot method
+            processed_frame = results[0].plot()
 
             # Extract speed information
             speed_info = results[0].speed if isinstance(results[0].speed, dict) else {'inference': 0, 'preprocess': 0, 'postprocess': 0}
@@ -258,11 +258,14 @@ if option == "Upload Video":
             out.release()
             st.success(f"Result video saved as {result_video_path}")
 
-            # Show final processed video and provide download option
-            st.video(result_video_path)
-            with open(result_video_path, "rb") as f:
-                st.sidebar.title("8. Detected Video Result")
-                st.sidebar.download_button("Download Result Video", f, file_name=result_video_path)
+            # Check if the file exists before trying to open it
+            if os.path.exists(result_video_path):
+                st.video(result_video_path)
+                with open(result_video_path, "rb") as f:
+                    st.sidebar.title("8. Detected Video Result")
+                    st.sidebar.download_button("Download Result Video", f, file_name=result_video_path)
+            else:
+                st.error("The result video was not found after processing.")
         else:
             st.warning("No frames were processed, so no result video was created.")
 
