@@ -91,34 +91,121 @@ def load_yolor_and_process_each_frame(frame, min_score_thresh, enable_cpu):
      return results
 
         
+# # Video upload processing
+# if option == "Upload Video":
+#     uploaded_video = st.sidebar.file_uploader("7.Upload a video...", type=["mp4", "avi", "mov"])
+#     if uploaded_video is not None:
+#         video_path = uploaded_video.name
+#         with open(video_path, "wb") as f:
+#             f.write(uploaded_video.read())
+
+#         st.subheader("Upload Tested Video ")
+#         st.video(video_path)  # Show uploaded video before detection
+
+#         # Video processing
+#         #st.write("Upload Tested Video ")
+#         cap = cv2.VideoCapture(video_path)
+#         processed_frames = []
+
+#         # Create a placeholder for the video
+#         video_placeholder = st.empty()
+
+#         st.subheader("Result Will Be Save Here After Detection")
+#         with open(result_video_path, "rb") as f:
+#          st.download_button(f" saved as {result_video_path}"
+#                    "Download Result Video", f, file_name=result_video_path)
+        
+        
+#         # Display "Detection Frame Detail Results" title in the middle of the page
+#         st.subheader("Detection Frame Detail Results")
+
+#         while cap.isOpened():
+#             ret, frame = cap.read()
+#             if not ret:
+#                 break
+
+#             # Call the function to process each frame with YOLOR and DeepSORT
+#             results = load_yolor_and_process_each_frame(frame, MIN_SCORE_THRES, enable_cpu)
+
+#             # Draw bounding boxes on the frame
+#             processed_frame = results[0].plot()  # Assuming you want to use YOLO's plot method
+
+#             # Extract speed information
+#             speed_info = results[0].speed if isinstance(results[0].speed, dict) else {'inference': 0, 'preprocess': 0, 'postprocess': 0}
+#             inference_time = speed_info.get('inference', 0)
+#             preprocess_time = speed_info.get('preprocess', 0)
+#             postprocess_time = speed_info.get('postprocess', 0)
+
+#             # Extract detections and their labels
+#             detections = results[0].boxes
+#             detection_text = []
+#             for box in detections[:MAX_BOXES_TO_DRAW]:
+#                 class_id = int(box.cls)
+#                 label = model.names[class_id]
+#                 detection_text.append(label)
+
+#             detection_count = len(detection_text)
+#             detection_text_str = ', '.join(detection_text) if detection_text else "no detections"
+
+#             # Update the placeholder with the processed frame
+#             video_placeholder.image(processed_frame[:, :, ::-1], channels="RGB", caption="Video Processing...")
+            
+
+#             # Display frame processing info
+#             postprocess_shape = processed_frame.shape 
+#             st.write(f"Frame {len(processed_frames)}: {frame.shape[0]}x{frame.shape[1]}, "f"(Objects: {detection_count}, detections: {detection_text_str}), "
+#                      f"Speed: {preprocess_time:.1f}ms preprocess, {inference_time:.1f}ms inference, "f"{postprocess_time:.1f}ms postprocess, "f"Processed Frame Shape: {postprocess_shape}")
+
+#             processed_frames.append(processed_frame)
+
+#         cap.release()
+#         os.remove(video_path)  # Clean up the uploaded video
+
+#         # Save the processed frames as a video
+#         if save_option == "Yes" and processed_frames:
+#             out = cv2.VideoWriter(result_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 20, (processed_frames[0].shape[1], processed_frames[0].shape[0]))
+#             for frame in processed_frames:
+#                 out.write(frame)
+#             out.release()
+#             st.success(f"Result video saved as {result_video_path}")
+
+#         # Show final processed video and provide download option
+#         st.video(result_video_path)
+#         with open(result_video_path, "rb") as f:
+#             st.sidebar.title("8.Detected Video Result")
+#             st.sidebar.download_button("Download Result Video", f, file_name=result_video_path)
+
+#         #st.text("Video is Processed")  # Indicate processing completion
+
+# Define constants
+MIN_SCORE_THRES = 0.5  # Define your score threshold
+MAX_BOXES_TO_DRAW = 10  # Maximum number of boxes to draw
+result_video_path = "processed_video.mp4"  # Path where the result video will be saved
+
 # Video upload processing
+option = st.sidebar.selectbox("Choose an option", ["Upload Video"])  # Adjust options as needed
+
 if option == "Upload Video":
-    uploaded_video = st.sidebar.file_uploader("7.Upload a video...", type=["mp4", "avi", "mov"])
+    uploaded_video = st.sidebar.file_uploader("7. Upload a video...", type=["mp4", "avi", "mov"])
+    
     if uploaded_video is not None:
         video_path = uploaded_video.name
         with open(video_path, "wb") as f:
             f.write(uploaded_video.read())
 
-        st.subheader("Upload Tested Video ")
+        st.subheader("Upload Tested Video")
         st.video(video_path)  # Show uploaded video before detection
 
         # Video processing
-        #st.write("Upload Tested Video ")
         cap = cv2.VideoCapture(video_path)
         processed_frames = []
 
         # Create a placeholder for the video
         video_placeholder = st.empty()
 
-        st.subheader("Result Will Be Save Here After Detection")
-        with open(result_video_path, "rb") as f:
-         st.download_button(f" saved as {result_video_path}"
-                   "Download Result Video", f, file_name=result_video_path)
+        st.subheader("Result Will Be Saved Here After Detection")
         
-        
-        # Display "Detection Frame Detail Results" title in the middle of the page
-        st.subheader("Detection Frame Detail Results")
-
+        # Process video frames
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -149,12 +236,13 @@ if option == "Upload Video":
 
             # Update the placeholder with the processed frame
             video_placeholder.image(processed_frame[:, :, ::-1], channels="RGB", caption="Video Processing...")
-            
 
             # Display frame processing info
             postprocess_shape = processed_frame.shape 
-            st.write(f"Frame {len(processed_frames)}: {frame.shape[0]}x{frame.shape[1]}, "f"(Objects: {detection_count}, detections: {detection_text_str}), "
-                     f"Speed: {preprocess_time:.1f}ms preprocess, {inference_time:.1f}ms inference, "f"{postprocess_time:.1f}ms postprocess, "f"Processed Frame Shape: {postprocess_shape}")
+            st.write(f"Frame {len(processed_frames)}: {frame.shape[0]}x{frame.shape[1]}, "
+                     f"(Objects: {detection_count}, detections: {detection_text_str}), "
+                     f"Speed: {preprocess_time:.1f}ms preprocess, {inference_time:.1f}ms inference, "
+                     f"{postprocess_time:.1f}ms postprocess, Processed Frame Shape: {postprocess_shape}")
 
             processed_frames.append(processed_frame)
 
@@ -162,20 +250,21 @@ if option == "Upload Video":
         os.remove(video_path)  # Clean up the uploaded video
 
         # Save the processed frames as a video
-        if save_option == "Yes" and processed_frames:
-            out = cv2.VideoWriter(result_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 20, (processed_frames[0].shape[1], processed_frames[0].shape[0]))
+        if processed_frames:
+            out = cv2.VideoWriter(result_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 20, 
+                                  (processed_frames[0].shape[1], processed_frames[0].shape[0]))
             for frame in processed_frames:
                 out.write(frame)
             out.release()
             st.success(f"Result video saved as {result_video_path}")
 
-        # Show final processed video and provide download option
-        st.video(result_video_path)
-        with open(result_video_path, "rb") as f:
-            st.sidebar.title("8.Detected Video Result")
-            st.sidebar.download_button("Download Result Video", f, file_name=result_video_path)
-
-        #st.text("Video is Processed")  # Indicate processing completion
+            # Show final processed video and provide download option
+            st.video(result_video_path)
+            with open(result_video_path, "rb") as f:
+                st.sidebar.title("8. Detected Video Result")
+                st.sidebar.download_button("Download Result Video", f, file_name=result_video_path)
+        else:
+            st.warning("No frames were processed, so no result video was created.")
 
 
 # Webcam Detection
