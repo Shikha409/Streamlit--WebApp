@@ -126,11 +126,11 @@ info_text = st.empty()
 
 if run:
     # Option to select Webcam or IP Camera appears only after 'Start Camera Detection' is checked
-    camera_option = st.sidebar.selectbox("Select Camera Type", ["Webcam", "IP Camera"])
+    camera_option = st.selectbox("Select Camera Type", ["Webcam", "IP Camera"])
 
     # If IP Camera is selected, allow user to input the IP stream URL
     if camera_option == "IP Camera":
-        ip_url = st.sidebar.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
+        ip_url = st.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
     else:
         ip_url = None
 
