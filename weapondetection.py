@@ -57,7 +57,7 @@ def display_results(result, original_image):
 
 # Image upload processing
 if option == "Upload Image":
-    uploaded_image = st.file_uploader("Choose an image...", type=("jpg", "jpeg", "png", 'bmp', 'webp'))
+    uploaded_image = st.sidebar.file_uploader("7.Choose an image...", type=("jpg", "jpeg", "png", 'bmp', 'webp'))
     if uploaded_image is not None:
         image = Image.open(uploaded_image)
         result = process_image(image)
@@ -70,7 +70,7 @@ if option == "Upload Image":
 
 # Video upload processing
 elif option == "Upload Video":
-    uploaded_video = st.file_uploader("Upload a video...", type=["mp4", "avi", "mov"])
+    uploaded_video = st.sidebar.file_uploader("7.Upload a video...", type=["mp4", "avi", "mov"])
     if uploaded_video is not None:
         tfile = tempfile.NamedTemporaryFile(delete=False) 
         tfile.write(uploaded_video.read())
