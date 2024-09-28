@@ -127,7 +127,6 @@ if option == "Webcam Detection":
       #option = st.selectbox("Select Mode", ["Choose...", "Webcam Detection", "IP Camera Detection"])
 
     if start_button:
-        st.selectbox("Select Mode", ["Choose...", "Webcam Detection", "IP Camera Detection"])
         cap = cv2.VideoCapture(0)
         processed_frames = []
 
