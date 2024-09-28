@@ -121,7 +121,7 @@ model.to(DEVICES)
 
 # Webcam Detection Toggle
 if option == "Livecam Detection":
-run = st.checkbox('Start Camera Detection')
+Livecam Detection = st.checkbox('Start Camera Detection')
 FRAME_WINDOW = st.image([])
 info_text = st.empty()
 
