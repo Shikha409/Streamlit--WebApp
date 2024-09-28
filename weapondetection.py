@@ -19,7 +19,7 @@ st.title("YOLOv8 Objects Detection App")
 
 # Sidebar for options
 st.sidebar.title("Detection Options Config")
-option = st.sidebar.radio("1. Select Input Type:", ("Upload Image", "Upload Video", "Webcam Detection", "Select Camera Type", ["Webcam", "IP Camera"]))
+option = st.sidebar.radio("1. Select Input Type:", ("Upload Image", "Upload Video", "Webcam Detection")
 
 # Sidebar settings
 MAX_BOXES_TO_DRAW = st.sidebar.number_input('2. Maximum Boxes To Draw', value=5, min_value=1, max_value=20)
@@ -116,30 +116,24 @@ elif option == "Upload Video":
         cap.release()
         os.unlink(tfile.name)
 
-# Option to select Webcam or IP Camera
-camera_option = st.checkbox("Select Camera Type", ["Webcam", "IP Camera"])
+# Set the model to use the selected device
+model.to(DEVICES)
 
-# If IP Camera is selected, allow user to input the IP stream URL
-if camera_option == "IP Camera":
-    ip_url = st.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
-else:
-    ip_url = None
-
-# Function to process video frame
-def process_video_frame(frame):
-    results = model(frame, conf=MIN_SCORE_THRES, max_det=MAX_BOXES_TO_DRAW)
-    return results[0]
-
-# Function to resize frame
-def resize_frame(frame, width=640, height=480):
-    return cv2.resize(frame, (width, height))
-
-# Webcam or IP Camera Detection
-run = st.button('Start Camera Detection')
+# Webcam Detection Toggle
+run = st.checkbox('Start Camera Detection')
 FRAME_WINDOW = st.image([])
 info_text = st.empty()
 
 if run:
+    # Option to select Webcam or IP Camera appears only after 'Start Camera Detection' is checked
+    camera_option = st.sidebar.selectbox("Select Camera Type", ["Webcam", "IP Camera"])
+
+    # If IP Camera is selected, allow user to input the IP stream URL
+    if camera_option == "IP Camera":
+        ip_url = st.sidebar.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
+    else:
+        ip_url = None
+
     # If using IP Camera, try to connect to the stream
     if ip_url:
         camera = cv2.VideoCapture(ip_url)
