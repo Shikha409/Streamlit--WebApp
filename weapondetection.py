@@ -116,25 +116,51 @@ elif option == "Upload Video":
         cap.release()
         os.unlink(tfile.name)
 
-# Webcam Detection
-elif option == "Webcam Detection":
-    run = st.checkbox('Start Webcam')
-    FRAME_WINDOW = st.image([])
-    camera = cv2.VideoCapture(0)
+# Function to process video frame
+def process_video_frame(frame):
+    results = model(frame, conf=MIN_SCORE_THRES, max_det=MAX_BOXES_TO_DRAW)
+    return results[0]
 
+# Function to resize frame
+def resize_frame(frame, width=640, height=480):
+    return cv2.resize(frame, (width, height))
+
+# Webcam Detection
+run = st.checkbox('Start Webcam Detection')
+FRAME_WINDOW = st.image([])
+info_text = st.empty()
+
+if run:
+    camera = cv2.VideoCapture(0)
+    
     while run:
-        _, frame = camera.read()
+        ret, frame = camera.read()
+        if not ret:
+            st.error("Failed to capture frame from webcam. Please check your camera connection.")
+            break
+
         result = process_video_frame(frame)
         processed_frame = result.plot()
-        FRAME_WINDOW.image(processed_frame, channels="BGR")
         
-        # Display frame info
-        st.write(f"Objects: {len(result.boxes)}, "
-                 f"Classes: {', '.join([model.names[int(cls)] for cls in result.boxes.cls])}")
+        # Resize the frame to a more viewable size
+        resized_frame = resize_frame(processed_frame, width=640, height=480)
         
-        # Add a small delay to reduce CPU usage
+        # Convert BGR to RGB
+        rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
+        
+        # Display the frame
+        FRAME_WINDOW.image(rgb_frame, caption="Live Webcam Feed")
+        
+        # Display detection info
+        detected_objects = [f"{model.names[int(cls)]} ({conf:.2f})" for cls, conf in zip(result.boxes.cls, result.boxes.conf)]
+        info_text.write(f"Detected Objects: {', '.join(detected_objects)}")
+        
+        # Add a small delay to reduce CPU usage and control frame rate
         time.sleep(0.1)
-    
+
     camera.release()
 
-st.write("Note: Press 'Stop' in the top right corner to end the detection.")
+else:
+    st.write("Click 'Start Webcam Detection' to begin.")
+
+st.write("Note: Press 'Stop' in the top right corner or uncheck the 'Start Webcam Detection' box to end the detection.")
