@@ -131,6 +131,9 @@ elif option == "Livecam Detection":
      start_button = st.button("Start Webcam Detection")
 
      if start_button:
+          cap = cv2.VideoCapture(0)
+        processed_frames = []
+
          FRAME_WINDOW = st.image([])
          info_text = st.empty()
 
