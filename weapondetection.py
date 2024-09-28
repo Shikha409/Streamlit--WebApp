@@ -5,6 +5,7 @@ import numpy as np
 from ultralytics import YOLO
 import os
 import tempfile
+import time
 
 # Load the YOLOv8 model
 #@st.cache_resource
@@ -57,7 +58,7 @@ def display_results(result, original_image):
 
 # Image upload processing
 if option == "Upload Image":
-    uploaded_image = st.sidebar.file_uploader("7.Choose an image...", type=("jpg", "jpeg", "png", 'bmp', 'webp'))
+    uploaded_image = st.file_uploader("Choose an image...", type=("jpg", "jpeg", "png", 'bmp', 'webp'))
     if uploaded_image is not None:
         image = Image.open(uploaded_image)
         result = process_image(image)
@@ -70,7 +71,7 @@ if option == "Upload Image":
 
 # Video upload processing
 elif option == "Upload Video":
-    uploaded_video = st.sidebar.file_uploader("7.Upload a video...", type=["mp4", "avi", "mov"])
+    uploaded_video = st.file_uploader("Upload a video...", type=["mp4", "avi", "mov"])
     if uploaded_video is not None:
         tfile = tempfile.NamedTemporaryFile(delete=False) 
         tfile.write(uploaded_video.read())
@@ -78,7 +79,20 @@ elif option == "Upload Video":
         st.video(tfile.name)
         
         cap = cv2.VideoCapture(tfile.name)
-        stframe = st.empty()
+        
+        # Create a placeholder for snapshots
+        snapshot_placeholder = st.empty()
+        
+        # Create columns for snapshot controls
+        col1, col2, col3 = st.columns([1,1,1])
+        with col1:
+            snapshot_button = st.button("Take Snapshot")
+        with col2:
+            auto_snapshot = st.checkbox("Auto Snapshot")
+        with col3:
+            snapshot_interval = st.number_input("Snapshot Interval (seconds)", min_value=1, value=5)
+        
+        last_snapshot_time = time.time()
         
         while cap.isOpened():
             ret, frame = cap.read()
@@ -86,7 +100,13 @@ elif option == "Upload Video":
                 break
             
             result = process_video_frame(frame)
-            stframe.image(result.plot(), channels="BGR", use_column_width=True)
+            processed_frame = result.plot()
+            
+            current_time = time.time()
+            if snapshot_button or (auto_snapshot and current_time - last_snapshot_time >= snapshot_interval):
+                snapshot_placeholder.image(processed_frame, channels="BGR", caption="Latest Snapshot", use_column_width=True)
+                last_snapshot_time = current_time
+                snapshot_button = False  # Reset the button state
             
             # Display frame info
             st.write(f"Frame: {cap.get(cv2.CAP_PROP_POS_FRAMES):.0f}, "
@@ -105,11 +125,15 @@ elif option == "Webcam Detection":
     while run:
         _, frame = camera.read()
         result = process_video_frame(frame)
-        FRAME_WINDOW.image(result.plot(), channels="BGR")
+        processed_frame = result.plot()
+        FRAME_WINDOW.image(processed_frame, channels="BGR")
         
         # Display frame info
         st.write(f"Objects: {len(result.boxes)}, "
                  f"Classes: {', '.join([model.names[int(cls)] for cls in result.boxes.cls])}")
+        
+        # Add a small delay to reduce CPU usage
+        time.sleep(0.1)
     
     camera.release()
 
