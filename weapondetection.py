@@ -124,7 +124,7 @@ model.to(DEVICES)
 if option == "Webcam Detection":
     start_button = st.button("Start Webcam Detection")
     # Main options for camera detection modes
-      option = st.selectbox("Select Mode", ["Choose...", "Webcam Detection", "IP Camera Detection"])
+      #option = st.selectbox("Select Mode", ["Choose...", "Webcam Detection", "IP Camera Detection"])
 
     if start_button:
         cap = cv2.VideoCapture(0)
@@ -133,6 +133,7 @@ if option == "Webcam Detection":
         # Create a placeholder for the video
         video_placeholder = st.empty()
 
+        st.selectbox("Select Mode", ["Choose...", "Webcam Detection", "IP Camera Detection"])
         st.subheader("Detection Frame Detail Results")
 
         while cap.isOpened():
