@@ -117,7 +117,7 @@ elif option == "Upload Video":
         os.unlink(tfile.name)
 
 # Option to select Webcam or IP Camera
-camera_option = st.selectbox("Select Camera Type", ["Webcam", "IP Camera"])
+camera_option = st.subheader("Select Camera Type", ["Webcam", "IP Camera"])
 
 # If IP Camera is selected, allow user to input the IP stream URL
 if camera_option == "IP Camera":
