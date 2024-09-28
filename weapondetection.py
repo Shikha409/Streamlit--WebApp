@@ -19,7 +19,7 @@ st.title("YOLOv8 Objects Detection App")
 
 # Sidebar for options
 st.sidebar.title("Detection Options Config")
-option = st.sidebar.radio("1. Select Input Type:", ("Upload Image", "Upload Video", "Webcam Detection"))
+option = st.sidebar.radio("1. Select Input Type:", ("Upload Image", "Upload Video", "Webcam Detection", "Select Camera Type", ["Webcam", "IP Camera"]))
 
 # Sidebar settings
 MAX_BOXES_TO_DRAW = st.sidebar.number_input('2. Maximum Boxes To Draw', value=5, min_value=1, max_value=20)
@@ -117,7 +117,7 @@ elif option == "Upload Video":
         os.unlink(tfile.name)
 
 # Option to select Webcam or IP Camera
-camera_option = st.subheader("Select Camera Type", ["Webcam", "IP Camera"])
+camera_option = st.checkbox("Select Camera Type", ["Webcam", "IP Camera"])
 
 # If IP Camera is selected, allow user to input the IP stream URL
 if camera_option == "IP Camera":
