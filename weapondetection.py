@@ -119,11 +119,20 @@ elif option == "Upload Video":
 # Set the model to use the selected device
 model.to(DEVICES)
 
+elif option == "Webcam Detection":
+    start_button = st.button("Start Webcam Detection")
+
+    if start_button:
+        cap = cv2.VideoCapture(0)
+        processed_frames = []
+
 # Webcam Detection Toggle
-if option == "Livecam Detection":
-Livecam Detection = st.checkbox('Start Camera Detection')
-FRAME_WINDOW = st.image([])
-info_text = st.empty()
+elif option == "Livecam Detection":
+     start_button = st.button("Start Webcam Detection")
+
+     if start_button:
+         FRAME_WINDOW = st.image([])
+         info_text = st.empty()
 
 if run:
     # Option to select Webcam or IP Camera appears only after 'Start Camera Detection' is checked
