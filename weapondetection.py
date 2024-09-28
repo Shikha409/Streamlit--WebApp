@@ -40,6 +40,10 @@ def process_video_frame(frame):
     results = model(frame, conf=MIN_SCORE_THRES, max_det=MAX_BOXES_TO_DRAW)
     return results[0]
 
+# Function to resize frame
+def resize_frame(frame, width=15, height=12):
+    return cv2.resize(frame, (width, height))
+
 # Function to display detection results
 def display_results(result, original_image):
     col1, col2 = st.columns(2)
@@ -80,6 +84,10 @@ elif option == "Upload Video":
         
         cap = cv2.VideoCapture(tfile.name)
         
+        # Get video properties
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        
         # Create a placeholder for snapshots
         snapshot_placeholder = st.empty()
         
@@ -94,24 +102,35 @@ elif option == "Upload Video":
         
         last_snapshot_time = time.time()
         
-        while cap.isOpened():
+        # Progress bar
+        progress_bar = st.progress(0)
+        
+        for frame_index in range(frame_count):
             ret, frame = cap.read()
             if not ret:
                 break
+            
+            # Update progress bar
+            progress = int((frame_index + 1) / frame_count * 100)
+            progress_bar.progress(progress)
             
             result = process_video_frame(frame)
             processed_frame = result.plot()
             
             current_time = time.time()
             if snapshot_button or (auto_snapshot and current_time - last_snapshot_time >= snapshot_interval):
-                snapshot_placeholder.image(processed_frame, channels="BGR", caption="Latest Snapshot", use_column_width=True)
+                resized_frame = resize_frame(processed_frame, width=15, height=12)
+                snapshot_placeholder.image(resized_frame, channels="BGR", caption="Latest Snapshot (15x12)", use_column_width=True)
                 last_snapshot_time = current_time
                 snapshot_button = False  # Reset the button state
             
             # Display frame info
-            st.write(f"Frame: {cap.get(cv2.CAP_PROP_POS_FRAMES):.0f}, "
+            st.write(f"Frame: {frame_index + 1}/{frame_count}, "
                      f"Objects: {len(result.boxes)}, "
                      f"Classes: {', '.join([model.names[int(cls)] for cls in result.boxes.cls])}")
+            
+            # Control frame rate
+            time.sleep(1/fps)
         
         cap.release()
         os.unlink(tfile.name)
@@ -126,13 +145,14 @@ elif option == "Webcam Detection":
         _, frame = camera.read()
         result = process_video_frame(frame)
         processed_frame = result.plot()
-        FRAME_WINDOW.image(processed_frame, channels="BGR")
+        resized_frame = resize_frame(processed_frame, width=15, height=12)
+        FRAME_WINDOW.image(resized_frame, channels="BGR", caption="Webcam Feed (15x12)")
         
         # Display frame info
         st.write(f"Objects: {len(result.boxes)}, "
                  f"Classes: {', '.join([model.names[int(cls)] for cls in result.boxes.cls])}")
         
-        # Add a small delay to reduce CPU usage
+        # Add a small delay to reduce CPU usage and control frame rate
         time.sleep(0.1)
     
     camera.release()
