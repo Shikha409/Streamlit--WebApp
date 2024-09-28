@@ -119,87 +119,131 @@ elif option == "Upload Video":
 # Set the model to use the selected device
 model.to(DEVICES)
 
-# Webcam Detection Toggle
-option = st.selectbox("Select Mode", ["Choose...", "Livecam Detection"])
+# Main options for camera detection modes
+option = st.selectbox("Select Mode", ["Choose...", "Webcam Detection", "IP Camera Detection"])
 
-if option == "Livecam Detection":
-    # Start Webcam Detection button
+if option == "Webcam Detection":
     start_button = st.button("Start Webcam Detection")
 
     if start_button:
-        # After the start button is clicked, show options for webcam or IP camera
-        camera_option = st.selectbox("Select Camera Type", ["Webcam", "IP Camera"])
+        cap = cv2.VideoCapture(0)
+        processed_frames = []
 
-        # If IP Camera is selected, allow user to input the IP stream URL
-        if camera_option == "IP Camera":
-            ip_url = st.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
-        else:
-            ip_url = None
+        # Create a placeholder for the video
+        video_placeholder = st.empty()
 
-        run = True
+        st.subheader("Detection Frame Detail Results")
 
-        if run:
-            # If using IP Camera, try to connect to the stream
-            if ip_url:
-                camera = cv2.VideoCapture(ip_url)
-                if not camera.isOpened():
-                    st.error(f"Failed to connect to IP Camera at {ip_url}. Please check the URL and try again.")
-                    run = False
-                else:
-                    st.success(f"Successfully connected to IP Camera: {ip_url}")
-            else:
-                # Try different camera indices for the Webcam
-                for camera_index in [0, 1, 2, 3]:
-                    camera = cv2.VideoCapture(camera_index)
-                    if camera.isOpened():
-                        st.success(f"Successfully connected to Webcam index {camera_index}")
-                        break
-                else:
-                    st.error("Failed to connect to any Webcam. Please check your camera connection and try again.")
-                    run = False
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                st.warning("Failed to read from the webcam. Check if it's connected.")
+                break
 
-            # Display video feed and perform detection
-            if run:
-                FRAME_WINDOW = st.image([])
-                info_text = st.empty()
+            # Perform object detection on the frame
+            results = model(frame, conf=MIN_SCORE_THRES, max_det=MAX_BOXES_TO_DRAW)
+            processed_frame = results[0].plot()
+            processed_frames.append(processed_frame)
 
-                try:
-                    while run:
-                        ret, frame = camera.read()
-                        if not ret:
-                            st.warning("Failed to capture frame. Trying again...")
-                            time.sleep(1)
-                            continue
+            # Extract speed information
+            speed_info = results[0].speed if isinstance(results[0].speed, dict) else {'inference': 0, 'preprocess': 0, 'postprocess': 0}
+            inference_time = speed_info.get('inference', 0)
+            preprocess_time = speed_info.get('preprocess', 0)
+            postprocess_time = speed_info.get('postprocess', 0)
 
-                        result = model(frame, conf=MIN_SCORE_THRES, max_det=MAX_BOXES_TO_DRAW)
+            # Extract detections and their labels
+            detections = results[0].boxes
+            detection_text = []
+            for box in detections[:MAX_BOXES_TO_DRAW]:
+                class_id = int(box.cls)
+                label = model.names[class_id]
+                detection_text.append(label)
 
-                        # Change detection box color (RGB value) and line thickness
-                        processed_frame = result[0].plot(line_width=3, color=(0, 255, 0))  # Green boxes with thicker lines
+            detection_count = len(detection_text)
+            detection_text_str = ', '.join(detection_text) if detection_text else "No detections"
 
-                        # Resize the frame to a more viewable size
-                        resized_frame = cv2.resize(processed_frame, (640, 480))
+            # Update the placeholder with the processed frame
+            video_placeholder.image(processed_frame[:, :, ::-1], channels="RGB", caption="Webcam Detection")
 
-                        # Convert BGR to RGB for display
-                        rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
+            # Display frame processing info 
+            st.write(f"Frame {len(processed_frames) - 1}: {frame.shape[0]}x{frame.shape[1]}, "
+                     f"(Objects: {detection_count}, {detection_text_str}), "
+                     f"Speed: {preprocess_time:.1f}ms preprocess, {inference_time:.1f}ms inference, {postprocess_time:.1f}ms postprocess")
 
-                        # Display the frame
-                        FRAME_WINDOW.image(rgb_frame, caption="Live Camera Feed")
+        cap.release()
 
-                        # Display detected objects
-                        detected_objects = [
-                            f"{model.names[int(cls)]} ({conf:.2f})"
-                            for cls, conf in zip(result[0].boxes.cls, result[0].boxes.conf)
-                        ]
-                        info_text.write(f"Detected Objects: {', '.join(detected_objects)}")
+        # Save the processed webcam video if the user chooses to do so
+        save_option = st.sidebar.radio("Save Processed Video?", ("No", "Yes"))
+        if save_option == "Yes" and processed_frames:
+            result_video_path = st.text_input("Enter the filename to save the video (e.g., 'result.mp4')", "result.mp4")
+            out = cv2.VideoWriter(result_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 20, (processed_frames[0].shape[1], processed_frames[0].shape[0]))
+            for frame in processed_frames:
+                out.write(frame)
+            out.release()
+            st.success(f"Video saved as {result_video_path}")
 
-                        # Add a small delay to control frame rate
-                        time.sleep(0.1)
+elif option == "IP Camera Detection":
+    start_button = st.button("Start IP Camera Detection")
 
-                except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
-                finally:
-                    camera.release()
+    if start_button:
+        ip_url = st.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
+        
+        if ip_url:
+            cap = cv2.VideoCapture(ip_url)
+            processed_frames = []
+
+            # Create a placeholder for the video
+            video_placeholder = st.empty()
+
+            st.subheader("Detection Frame Detail Results")
+
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    st.warning("Failed to read from the IP Camera. Check if the URL is correct.")
+                    break
+
+                # Perform object detection on the frame
+                results = model(frame, conf=MIN_SCORE_THRES, max_det=MAX_BOXES_TO_DRAW)
+                processed_frame = results[0].plot()
+                processed_frames.append(processed_frame)
+
+                # Extract speed information
+                speed_info = results[0].speed if isinstance(results[0].speed, dict) else {'inference': 0, 'preprocess': 0, 'postprocess': 0}
+                inference_time = speed_info.get('inference', 0)
+                preprocess_time = speed_info.get('preprocess', 0)
+                postprocess_time = speed_info.get('postprocess', 0)
+
+                # Extract detections and their labels
+                detections = results[0].boxes
+                detection_text = []
+                for box in detections[:MAX_BOXES_TO_DRAW]:
+                    class_id = int(box.cls)
+                    label = model.names[class_id]
+                    detection_text.append(label)
+
+                detection_count = len(detection_text)
+                detection_text_str = ', '.join(detection_text) if detection_text else "No detections"
+
+                # Update the placeholder with the processed frame
+                video_placeholder.image(processed_frame[:, :, ::-1], channels="RGB", caption="IP Camera Detection")
+
+                # Display frame processing info 
+                st.write(f"Frame {len(processed_frames) - 1}: {frame.shape[0]}x{frame.shape[1]}, "
+                         f"(Objects: {detection_count}, {detection_text_str}), "
+                         f"Speed: {preprocess_time:.1f}ms preprocess, {inference_time:.1f}ms inference, {postprocess_time:.1f}ms postprocess")
+
+            cap.release()
+
+            # Save the processed video if the user chooses to do so
+            save_option = st.sidebar.radio("Save Processed Video?", ("No", "Yes"))
+            if save_option == "Yes" and processed_frames:
+                result_video_path = st.text_input("Enter the filename to save the video (e.g., 'result.mp4')", "result.mp4")
+                out = cv2.VideoWriter(result_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 20, (processed_frames[0].shape[1], processed_frames[0].shape[0]))
+                for frame in processed_frames:
+                    out.write(frame)
+                out.release()
+                st.success(f"Video saved as {result_video_path}")
+
 else:
-    st.write("Click 'Livecam Detection' and then 'Start Webcam Detection' to begin.")
-
-st.write("Note: Press 'Stop' in the top right corner or uncheck the 'Start Camera Detection' box to end the detection.")
+    st.write("Select 'Webcam Detection' or 'IP Camera Detection' to start.")
