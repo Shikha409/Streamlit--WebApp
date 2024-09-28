@@ -119,11 +119,12 @@ elif option == "Upload Video":
 # Set the model to use the selected device
 model.to(DEVICES)
 
-# Main options for camera detection modes
-option = st.selectbox("Select Mode", ["Choose...", "Webcam Detection", "IP Camera Detection"])
+
 
 if option == "Webcam Detection":
     start_button = st.button("Start Webcam Detection")
+    # Main options for camera detection modes
+     option = st.selectbox("Select Mode", ["Choose...", "Webcam Detection", "IP Camera Detection"])
 
     if start_button:
         cap = cv2.VideoCapture(0)
