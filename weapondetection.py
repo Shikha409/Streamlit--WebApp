@@ -19,7 +19,7 @@ st.title("YOLOv8 Objects Detection App")
 
 # Sidebar for options
 st.sidebar.title("Detection Options Config")
-option = st.sidebar.radio("1. Select Input Type:", ("Upload Image", "Upload Video", "Webcam Detection"))
+option = st.sidebar.radio("1. Select Input Type:", ("Upload Image", "Upload Video", "Livecam Detection"))
 
 # Sidebar settings
 MAX_BOXES_TO_DRAW = st.sidebar.number_input('2. Maximum Boxes To Draw', value=5, min_value=1, max_value=20)
@@ -120,6 +120,7 @@ elif option == "Upload Video":
 model.to(DEVICES)
 
 # Webcam Detection Toggle
+if option == "Livecam Detection":
 run = st.checkbox('Start Camera Detection')
 FRAME_WINDOW = st.image([])
 info_text = st.empty()
