@@ -116,8 +116,14 @@ elif option == "Upload Video":
         cap.release()
         os.unlink(tfile.name)
 
-# Set the model to use the selected device
-model.to(DEVICES)
+# Option to select Webcam or IP Camera
+camera_option = st.sidebar.selectbox("Select Camera Type", ["Webcam", "IP Camera"])
+
+# If IP Camera is selected, allow user to input the IP stream URL
+if camera_option == "IP Camera":
+    ip_url = st.sidebar.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
+else:
+    ip_url = None
 
 # Function to process video frame
 def process_video_frame(frame):
@@ -128,21 +134,30 @@ def process_video_frame(frame):
 def resize_frame(frame, width=640, height=480):
     return cv2.resize(frame, (width, height))
 
-# Webcam Detection
-run = st.checkbox('Start Webcam Detection')
+# Webcam or IP Camera Detection
+run = st.checkbox('Start Camera Detection')
 FRAME_WINDOW = st.image([])
 info_text = st.empty()
 
 if run:
-    # Try different camera indices
-    for camera_index in [0, 1, 2, 3]:
-        camera = cv2.VideoCapture(camera_index)
-        if camera.isOpened():
-            st.success(f"Successfully connected to camera index {camera_index}")
-            break
+    # If using IP Camera, try to connect to the stream
+    if ip_url:
+        camera = cv2.VideoCapture(ip_url)
+        if not camera.isOpened():
+            st.error(f"Failed to connect to IP Camera at {ip_url}. Please check the URL and try again.")
+            run = False
+        else:
+            st.success(f"Successfully connected to IP Camera: {ip_url}")
     else:
-        st.error("Failed to connect to any camera. Please check your camera connection and try again.")
-        run = False
+        # Try different camera indices for the Webcam
+        for camera_index in [0, 1, 2, 3]:
+            camera = cv2.VideoCapture(camera_index)
+            if camera.isOpened():
+                st.success(f"Successfully connected to Webcam index {camera_index}")
+                break
+        else:
+            st.error("Failed to connect to any Webcam. Please check your camera connection and try again.")
+            run = False
 
     if run:
         try:
@@ -155,20 +170,20 @@ if run:
 
                 result = process_video_frame(frame)
                 processed_frame = result.plot()
-                
+
                 # Resize the frame to a more viewable size
                 resized_frame = resize_frame(processed_frame, width=640, height=480)
-                
+
                 # Convert BGR to RGB
                 rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
-                
+
                 # Display the frame
-                FRAME_WINDOW.image(rgb_frame, caption="Live Webcam Feed")
-                
+                FRAME_WINDOW.image(rgb_frame, caption="Live Camera Feed")
+
                 # Display detection info
                 detected_objects = [f"{model.names[int(cls)]} ({conf:.2f})" for cls, conf in zip(result.boxes.cls, result.boxes.conf)]
                 info_text.write(f"Detected Objects: {', '.join(detected_objects)}")
-                
+
                 # Add a small delay to reduce CPU usage and control frame rate
                 time.sleep(0.1)
 
@@ -178,6 +193,6 @@ if run:
             camera.release()
 
 else:
-    st.write("Click 'Start Webcam Detection' to begin.")
+    st.write("Click 'Start Camera Detection' to begin.")
 
-st.write("Note: Press 'Stop' in the top right corner or uncheck the 'Start Webcam Detection' box to end the detection.")
+st.write("Note: Press 'Stop' in the top right corner or uncheck the 'Start Camera Detection' box to end the detection.")
