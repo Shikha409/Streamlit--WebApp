@@ -116,6 +116,9 @@ elif option == "Upload Video":
         cap.release()
         os.unlink(tfile.name)
 
+# Set the model to use the selected device
+model.to(DEVICES)
+
 # Function to process video frame
 def process_video_frame(frame):
     results = model(frame, conf=MIN_SCORE_THRES, max_det=MAX_BOXES_TO_DRAW)
@@ -131,34 +134,48 @@ FRAME_WINDOW = st.image([])
 info_text = st.empty()
 
 if run:
-    camera = cv2.VideoCapture(0)
-    
-    while run:
-        ret, frame = camera.read()
-        if not ret:
-            st.error("Failed to capture frame from webcam. Please check your camera connection.")
+    # Try different camera indices
+    for camera_index in [0, 1, 2, 3]:
+        camera = cv2.VideoCapture(camera_index)
+        if camera.isOpened():
+            st.success(f"Successfully connected to camera index {camera_index}")
             break
+    else:
+        st.error("Failed to connect to any camera. Please check your camera connection and try again.")
+        run = False
 
-        result = process_video_frame(frame)
-        processed_frame = result.plot()
-        
-        # Resize the frame to a more viewable size
-        resized_frame = resize_frame(processed_frame, width=640, height=480)
-        
-        # Convert BGR to RGB
-        rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
-        
-        # Display the frame
-        FRAME_WINDOW.image(rgb_frame, caption="Live Webcam Feed")
-        
-        # Display detection info
-        detected_objects = [f"{model.names[int(cls)]} ({conf:.2f})" for cls, conf in zip(result.boxes.cls, result.boxes.conf)]
-        info_text.write(f"Detected Objects: {', '.join(detected_objects)}")
-        
-        # Add a small delay to reduce CPU usage and control frame rate
-        time.sleep(0.1)
+    if run:
+        try:
+            while run:
+                ret, frame = camera.read()
+                if not ret:
+                    st.warning("Failed to capture frame. Trying again...")
+                    time.sleep(1)
+                    continue
 
-    camera.release()
+                result = process_video_frame(frame)
+                processed_frame = result.plot()
+                
+                # Resize the frame to a more viewable size
+                resized_frame = resize_frame(processed_frame, width=640, height=480)
+                
+                # Convert BGR to RGB
+                rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
+                
+                # Display the frame
+                FRAME_WINDOW.image(rgb_frame, caption="Live Webcam Feed")
+                
+                # Display detection info
+                detected_objects = [f"{model.names[int(cls)]} ({conf:.2f})" for cls, conf in zip(result.boxes.cls, result.boxes.conf)]
+                info_text.write(f"Detected Objects: {', '.join(detected_objects)}")
+                
+                # Add a small delay to reduce CPU usage and control frame rate
+                time.sleep(0.1)
+
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+        finally:
+            camera.release()
 
 else:
     st.write("Click 'Start Webcam Detection' to begin.")
