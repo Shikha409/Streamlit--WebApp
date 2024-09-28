@@ -117,11 +117,11 @@ elif option == "Upload Video":
         os.unlink(tfile.name)
 
 # Option to select Webcam or IP Camera
-camera_option = st.sidebar.selectbox("Select Camera Type", ["Webcam", "IP Camera"])
+camera_option = st.selectbox("Select Camera Type", ["Webcam", "IP Camera"])
 
 # If IP Camera is selected, allow user to input the IP stream URL
 if camera_option == "IP Camera":
-    ip_url = st.sidebar.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
+    ip_url = st.text_input("Enter IP Camera URL (e.g., rtsp:// or http://)", "")
 else:
     ip_url = None
 
@@ -135,7 +135,7 @@ def resize_frame(frame, width=640, height=480):
     return cv2.resize(frame, (width, height))
 
 # Webcam or IP Camera Detection
-run = st.checkbox('Start Camera Detection')
+run = st.button('Start Camera Detection')
 FRAME_WINDOW = st.image([])
 info_text = st.empty()
 
