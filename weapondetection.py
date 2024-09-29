@@ -116,12 +116,10 @@ elif option == "Upload Video":
         cap.release()
         os.unlink(tfile.name)
 
-# Set the model to use the selected device
-model.to(DEVICES)
-# Main app logic
-detection_mode = st.subheader("Select Detection Mode:", ( "Live Webcam Detection"))
-
-
+# Livecam Detection
+elif option == "Livecam Detection":
+    st.subheader("Live Webcam Detection")
+    
     # Webcam selection
     webcam_options = ["Default Webcam"] + [f"Webcam {i}" for i in range(10)]  # Assuming max 10 webcams
     selected_webcam = st.selectbox("Select Webcam", webcam_options)
@@ -147,11 +145,8 @@ detection_mode = st.subheader("Select Detection Mode:", ( "Live Webcam Detection
                 result = process_video_frame(frame)
                 processed_frame = result.plot()
                 
-                # Resize the frame to a more viewable size
-                resized_frame = resize_frame(processed_frame, width=640, height=480)
-                
                 # Convert BGR to RGB
-                rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
+                rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
                 
                 # Display the frame
                 FRAME_WINDOW.image(rgb_frame, caption="Live Webcam Feed")
@@ -169,7 +164,3 @@ detection_mode = st.subheader("Select Detection Mode:", ( "Live Webcam Detection
         st.write("Click 'Start Webcam Detection' to begin.")
 
     st.write("Note: Press 'Stop' in the top right corner or uncheck the 'Start Webcam Detection' box to end the detection.")
-
-elif detection_mode == "Image Upload":
-    st.write("Image upload functionality can be implemented here.")
-    # You can add image upload and processing logic here if needed
