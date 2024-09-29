@@ -129,7 +129,7 @@ elif option == "Livecam Detection":
         if camera_type == "Webcam":
             camera_source = 0  # Default webcam index
         else:
-            ip_camera_url = st.text_input("Enter IP Camera URL (RTSP or HTTP)")
+            ip_camera_url = st.text_input("Enter IP Camera URL (rtsp://... or https//...)")
             #camera_source = st.text_input("Enter IP Camera URL")
         
         if st.button("Connect to Camera"):
