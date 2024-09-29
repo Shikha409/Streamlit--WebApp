@@ -121,10 +121,11 @@ elif option == "Livecam Detection":
     st.subheader("Live Webcam Detection")
     
     # Webcam selection
+    run = st.checkbox('Start Webcam Detection')
     webcam_options = ["Default Webcam"] + [f"Webcam {i}" for i in range(10)]  # Assuming max 10 webcams
     selected_webcam = st.selectbox("Select Webcam", webcam_options)
     
-    run = st.checkbox('Start Webcam Detection')
+    #run = st.checkbox('Start Webcam Detection')
     FRAME_WINDOW = st.image([])
     info_text = st.empty()
 
