@@ -116,35 +116,43 @@ elif option == "Upload Video":
         cap.release()
         os.unlink(tfile.name)
 
-# Livecam Detection
 elif option == "Livecam Detection":
     st.subheader("Live Webcam Detection")
     
-    # Webcam selection
+    # Start Webcam Detection button
     run = st.checkbox('Start Webcam Detection')
-    webcam_options = ["Default Webcam"] + [f"Webcam {i}" for i in range(10)]  # Assuming max 10 webcams
-    selected_webcam = st.selectbox("Select Webcam", webcam_options)
     
-    #run = st.checkbox('Start Webcam Detection')
-    FRAME_WINDOW = st.image([])
-    info_text = st.empty()
-
     if run:
-        # Map selected webcam to device index
-        webcam_index = webcam_options.index(selected_webcam) - 1  # -1 for default webcam
-        camera = cv2.VideoCapture(webcam_index)
+        # Camera selection
+        camera_type = st.radio("Select Camera Type", ["Webcam", "IP Camera"])
         
-        if not camera.isOpened():
-            st.error(f"Failed to open the selected webcam (index: {webcam_index}). Please try another webcam or check your connection.")
+        if camera_type == "Webcam":
+            camera_source = 0  # Default webcam index
         else:
-            while run:
-                ret, frame = camera.read()
-                if not ret:
-                    st.error("Failed to capture frame from webcam. Please check your camera connection.")
-                    break
-
-                result = process_video_frame(frame)
-                processed_frame = result.plot()
+            camera_source = st.text_input("Enter IP Camera URL")
+        
+        if st.button("Connect to Camera"):
+            FRAME_WINDOW = st.image([])
+            info_text = st.empty()
+            
+            if camera_type == "Webcam":
+                camera = cv2.VideoCapture(camera_source)
+            else:
+                camera = cv2.VideoCapture(camera_source)
+            
+            if not camera.isOpened():
+                st.error(f"Failed to open the selected camera. Please check your connection.")
+            else:
+                while run:
+                    ret, frame = camera.read()
+                    if not ret:
+                        st.error("Failed to capture frame from camera. Please check your camera connection.")
+                        break
+                    result = process_video_frame(frame)
+                    processed_frame = result.plot()
+                    FRAME_WINDOW.image(processed_frame, channels="BGR")
+                    
+            camera.release()
                 
                 # Convert BGR to RGB
                 rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
