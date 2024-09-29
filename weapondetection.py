@@ -119,17 +119,8 @@ elif option == "Upload Video":
 # Set the model to use the selected device
 model.to(DEVICES)
 # Main app logic
-detection_mode = st.radio("Select Detection Mode:", ("Image Upload", "Live Webcam Detection"))
+detection_mode = st.subheader("Select Detection Mode:", ( "Live Webcam Detection"))
 
-if detection_mode == "Live Webcam Detection":
-    # Sidebar settings
-    st.sidebar.title("Detection Settings")
-    MAX_BOXES_TO_DRAW = st.sidebar.number_input('Maximum Boxes To Draw', value=5, min_value=1, max_value=20)
-    DEVICES = st.sidebar.selectbox("Select Device", ['cpu', '0', '1', '2'], index=0)
-    MIN_SCORE_THRES = st.sidebar.slider('Min Confidence Score Threshold', min_value=0.0, max_value=1.0, value=0.4)
-
-    # Set the model to use the selected device
-    model.to(DEVICES)
 
     # Webcam selection
     webcam_options = ["Default Webcam"] + [f"Webcam {i}" for i in range(10)]  # Assuming max 10 webcams
