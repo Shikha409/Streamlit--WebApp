@@ -152,7 +152,7 @@ elif option == "Livecam Detection":
                     processed_frame = result.plot()
                     FRAME_WINDOW.image(processed_frame, channels="BGR")
                     
-            camera.release()
+                    camera.release()
                 
                 # Convert BGR to RGB
                 rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
