@@ -116,6 +116,67 @@ elif option == "Upload Video":
         cap.release()
         os.unlink(tfile.name)
 
+# elif option == "Livecam Detection":
+#     st.subheader("Live Webcam Detection")
+    
+#     # Start Webcam Detection button
+#     run = st.checkbox('Start Webcam Detection')
+    
+#     if run:
+#         # Camera selection
+#         camera_type = st.radio("Select Camera Type", ["Webcam", "IP Camera"])
+        
+#         if camera_type == "Webcam":
+#             camera_source = 0  # Default webcam index
+#         else:
+#             ip_camera_url = st.text_input("Enter IP Camera URL (rtsp://... or https//...)")
+#             #camera_source = st.text_input("Enter IP Camera URL")
+        
+#         if st.button("Connect to Camera"):
+#             FRAME_WINDOW = st.image([])
+#             info_text = st.empty()
+            
+#             if camera_type == "Webcam":
+#                 camera = cv2.VideoCapture(camera_source)
+#             else:
+#                 camera = cv2.VideoCapture(camera_source)
+            
+#             if not camera.isOpened():
+#                 st.error(f"Failed to open the selected camera. Please check your connection.")
+#             else:
+#                 while run:
+#                     ret, frame = camera.read()
+#                     if not ret:
+#                         st.error("Failed to capture frame from camera. Please check your camera connection.")
+#                         break
+#                     result = process_video_frame(frame)
+#                     processed_frame = result.plot()
+#                     FRAME_WINDOW.image(processed_frame, channels="BGR")
+                    
+#                     camera.release()
+                
+#                 # Convert BGR to RGB
+#                 rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
+                
+#                 # Display the frame
+#                 FRAME_WINDOW.image(rgb_frame, caption="Live Webcam Feed")
+                
+#                 # Display detection info
+#                 detected_objects = [f"{model.names[int(cls)]} ({conf:.2f})" for cls, conf in zip(result.boxes.cls, result.boxes.conf)]
+#                 info_text.write(f"Detected Objects: {', '.join(detected_objects)}")
+                
+#                 # Add a small delay to reduce CPU usage and control frame rate
+#                 time.sleep(0.1)
+
+#             camera.release()
+
+#     else:
+#         st.write("Click 'Start Webcam Detection' to begin.")
+
+#     st.write("Note: Press 'Stop' in the top right corner or uncheck the 'Start Webcam Detection' box to end the detection.")
+
+
+# Livecam Detection
 elif option == "Livecam Detection":
     st.subheader("Live Webcam Detection")
     
@@ -129,17 +190,14 @@ elif option == "Livecam Detection":
         if camera_type == "Webcam":
             camera_source = 0  # Default webcam index
         else:
-            ip_camera_url = st.text_input("Enter IP Camera URL (rtsp://... or https//...)")
-            #camera_source = st.text_input("Enter IP Camera URL")
+            ip_camera_url = st.text_input("Enter IP Camera URL (rtsp://... or https://...)")
+            camera_source = ip_camera_url
         
         if st.button("Connect to Camera"):
             FRAME_WINDOW = st.image([])
             info_text = st.empty()
             
-            if camera_type == "Webcam":
-                camera = cv2.VideoCapture(camera_source)
-            else:
-                camera = cv2.VideoCapture(camera_source)
+            camera = cv2.VideoCapture(camera_source)
             
             if not camera.isOpened():
                 st.error(f"Failed to open the selected camera. Please check your connection.")
@@ -149,26 +207,25 @@ elif option == "Livecam Detection":
                     if not ret:
                         st.error("Failed to capture frame from camera. Please check your camera connection.")
                         break
+                    
                     result = process_video_frame(frame)
                     processed_frame = result.plot()
-                    FRAME_WINDOW.image(processed_frame, channels="BGR")
                     
-                    camera.release()
-                
-                # Convert BGR to RGB
-                rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
-                
-                # Display the frame
-                FRAME_WINDOW.image(rgb_frame, caption="Live Webcam Feed")
-                
-                # Display detection info
-                detected_objects = [f"{model.names[int(cls)]} ({conf:.2f})" for cls, conf in zip(result.boxes.cls, result.boxes.conf)]
-                info_text.write(f"Detected Objects: {', '.join(detected_objects)}")
-                
-                # Add a small delay to reduce CPU usage and control frame rate
-                time.sleep(0.1)
+                    # Convert BGR to RGB
+                    rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
+                    
+                    # Display the frame
+                    FRAME_WINDOW.image(rgb_frame, caption="Live Camera Feed")
 
-            camera.release()
+
+                    # Display detection info
+                    detected_objects = [f"{model.names[int(cls)]} ({conf:.2f})" for cls, conf in zip(result.boxes.cls, result.boxes.conf)]
+                    info_text.write(f"Detected Objects: {', '.join(detected_objects)}")
+                    
+                    # Add a small delay to reduce CPU usage and control frame rate
+                    time.sleep(0.1)
+
+                camera.release()
 
     else:
         st.write("Click 'Start Webcam Detection' to begin.")
