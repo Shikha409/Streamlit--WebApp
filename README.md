@@ -41,11 +41,17 @@ Provides a detection history for each processed frame, including object counts a
 Supports both webcam detection and IP camera streams (RTSP/HTTP).
 
 # Sidebar Configurations
+
 **Input Type**: Choose between Upload Image, Upload Video, or Livecam Detection.
+
 **Maximum Boxes to Draw:** Specify the maximum number of objects to detect per image/frame.
+
 **Device Selection:** Choose whether to run on CPU or available GPUs (if configured).
+
 **Minimum Confidence Score:** Set the threshold for object detection confidence.
+
 **Save Option:** Select whether to save the detection results (images or videos).
+
 # Setup and Installation
 # Clone the Repository:
 
