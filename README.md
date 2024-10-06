@@ -54,8 +54,7 @@ Supports both webcam detection and IP camera streams (RTSP/HTTP).
 cd YOLOv8-Object-Detection-App
  **Install Dependencies:** You can install the required dependencies using pip:
 
-bash
-Copy code
+
 pip install -r requirements.txt
 **Download YOLOv8 Weights:**
 
