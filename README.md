@@ -7,21 +7,26 @@ This Streamlit application leverages the YOLOv8 model to perform real-time objec
 
 Upload images or videos for object detection.
 Option for live webcam detection, with support for both local webcams and IP cameras.
-#Object Detection using YOLOv8:
+
+**Object Detection using YOLOv8:**
 
 Utilizes YOLOv8 for object detection with options for CPU or GPU processing.
 Adjustable detection settings like the maximum number of objects to detect and minimum confidence threshold.
-#Detection Results Display:
+
+**Detection Results Display:**
 
 Side-by-side comparison of original and processed (detected objects) images or frames.
 Provides detection details including object classes, confidence scores, and speed metrics (preprocess, inference, and postprocess times).
-#Snapshot and Video Saving:
+
+**Snapshot and Video Saving:**
 
 In video mode, take snapshots or set up auto-snapshots at specified intervals.
 Save processed images and videos with detected objects highlighted.
-#Real-Time Performance Metrics:
+
+**Real-Time Performance Metrics:**
 
 Displays frame processing details such as detection counts, detected classes, and performance speeds for each frame in live detection.
+
 # How It Works
 1. Upload Image
 You can upload images in formats such as .jpg, .jpeg, .png, .bmp, and .webp.
