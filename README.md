@@ -79,7 +79,6 @@ To install the required Python packages, run:
 Adding support for multiple YOLO models (YOLOv5, YOLOv6, etc.).
 Implementing custom object detection classes.
 Integration with cloud services for real-time monitoring.
-**License**
-This project is licensed under the MIT License. See the LICENSE file for details.
+
 
 **stremlit web app link :** https://yolov8-detection--webapp-d9evvvch8gpkbtzhserfbb.streamlit.app/
