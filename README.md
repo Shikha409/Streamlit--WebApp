@@ -49,8 +49,7 @@ Supports both webcam detection and IP camera streams (RTSP/HTTP).
 # Setup and Installation
 # Clone the Repository:
 
-bash
-Copy code
+
 !git clone https://github.com/your-repository-name/YOLOv8-Object-Detection-App.git
 cd YOLOv8-Object-Detection-App
  **Install Dependencies:** You can install the required dependencies using pip:
@@ -63,8 +62,7 @@ pip install -r requirements.txt
 Download your YOLOv8 pre-trained weights (best.pt) and place them in the weights/ directory.
 **Run the App:** Run the Streamlit app with the following command:
 
-bash
-Copy code
+
 streamlit run app.py
 **Access the App:** Open your browser and go to http://localhost:8501 to access the object detection app.
 
@@ -76,9 +74,8 @@ Pillow
 ultralytics (YOLO)**
 To install the required Python packages, run:
 
-bash
-Copy code
-pip install streamlit opencv-python-headless Pillow ultralytics
+
+! pip install streamlit opencv-python-headless Pillow ultralytics
 **Future Improvements**
 Adding support for multiple YOLO models (YOLOv5, YOLOv6, etc.).
 Implementing custom object detection classes.
